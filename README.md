@@ -12,8 +12,6 @@ sudo docker build -t hopsoft/mri-2.0 /vagrant/mri-2.0
 
 ## Run an Image
 
-_NOTE: The image in question must have been pushed to the [Docker index](https://index.docker.io/u/hopsoft/)._
-
 ```shell
 vagrant up
 vagrant ssh
