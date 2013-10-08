@@ -1,0 +1,36 @@
+#!/bin/bash
+
+apt-get -qq update
+apt-get -y --force-yes install build-essential
+apt-get -y --force-yes install wget
+apt-get -y --force-yes install libtool
+apt-get -y --force-yes install zlib1g-dev
+apt-get -y --force-yes install libssl-dev
+apt-get -y --force-yes install libreadline6-dev
+apt-get -y --force-yes install libyaml-dev
+apt-get -y --force-yes install ncurses-dev
+apt-get -y --force-yes install libgdbm-dev
+apt-get -y --force-yes install libpq-dev
+apt-get -y --force-yes install libffi-dev
+
+cd /usr/local/src
+wget --quiet ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p247.tar.gz
+tar xzf ruby-2.0.0-p247.tar.gz
+cd /usr/local/src/ruby-2.0.0-p247
+./configure --prefix=/usr/local/ruby
+make
+make install
+rm /usr/local/src/ruby-2.0.0-p247.tar.gz
+
+cat << 'EOF' > ~/.gemrc
+---
+:update_sources: true
+:benchmark: false
+:backtrace: true
+:verbose: true
+gem: --no-ri --no-rdoc
+install: --no-rdoc --no-ri
+update:  --no-rdoc --no-ri
+EOF
+
+/usr/local/ruby/bin/gem install bundler
