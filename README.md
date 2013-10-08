@@ -22,13 +22,13 @@ sudo docker run -i -t hopsoft/rbx-2.0 bash
 ruby -v
 ```
 
-If you receive the error
+If you receive the error:
 
 ```
 Error starting container 3e4798cd37ce: fork/exec /usr/bin/lxc-start: operation not permitted
 ```
 
-Simply run again & things should work the 2nd time
+Simply run again & things should work the 2nd time.
 
 ```
 sudo docker run -i -t hopsoft/rbx-2.0 bash
