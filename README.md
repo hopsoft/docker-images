@@ -8,7 +8,6 @@ The source used to build my public Docker images.
 vagrant up
 vagrant ssh
 sudo docker build -t hopsoft/mri-2.0 /vagrant/mri-2.0
-sudo docker push hopsoft/mri-2.0
 ```
 
 ## Run an Image
