@@ -1,0 +1,16 @@
+#!/bin/bash
+
+apt-get update
+apt-get -y --force-yes install build-essential
+apt-get -y --force-yes install wget
+apt-get -y --force-yes python-software-properties
+apt-get -y --force-yes install python-dev
+
+cd /usr/local/src
+wget http://nodejs.org/dist/v0.10.22/node-v0.10.22.tar.gz
+tar xzf node-v0.10.22.tar.gz
+cd ./node-v0.10.22
+./configure --prefix=/usr/local
+make
+make install
+
