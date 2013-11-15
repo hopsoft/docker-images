@@ -1,5 +1,21 @@
 #!/bin/bash
 
-# start the graphite web application using the django development server
-# runs on port: 8080 by default
-PYTHONPATH=/opt/graphite/whisper /opt/graphite/bin/run-graphite-devel-server.py --libs=/opt/graphite/webapp/ /opt/graphite/
+
+
+# start carbon data collection daemon - default port: 2003 --------------------
+mkdir -p /var/log/carbon
+/opt/graphite/bin/carbon-cache.py start --logdir=/var/log/carbon
+
+
+
+
+# start graphite web app cgi server -------------------------------------------
+python /opt/graphite/webapp/graphite/manage.py runfcgi host=127.0.0.1 port=8080
+
+
+
+
+service nginx start
+
+
+read

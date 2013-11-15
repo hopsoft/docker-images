@@ -3,8 +3,14 @@
 
 
 # install dependencies --------------------------------------------------------
+apt-get -y --force-yes install lsb-release
+echo deb http://archive.ubuntu.com/ubuntu $(lsb_release -cs) main universe > /etc/apt/sources.list.d/universe.list
 apt-get update
 
+apt-get -y --force-yes install vim
+
+apt-get -y --force-yes install nginx
+apt-get -y --force-yes install python-flup
 apt-get -y --force-yes install expect
 apt-get -y --force-yes install git
 apt-get -y --force-yes install memcached
@@ -19,9 +25,10 @@ python /opt/distribute_setup.py
 easy_install pip
 
 pip install django==1.3
-pip install python-memcached
-pip install django-tagging
-pip install twisted
+pip install python-memcached==1.53
+pip install django-tagging==0.3.1
+pip install whisper==0.9.12
+pip install twisted==11.1.0
 pip install txAMQP==0.6.2
 
 
@@ -82,7 +89,7 @@ expect "Username *:" {
 }
 
 expect "E-mail address:" {
-  send "root@insecure.fail\r"
+  send "root.graphite@mailinator.com\r"
 }
 
 expect "Password:" {
@@ -99,34 +106,23 @@ chmod 775 /tmp/graphite_syncdb
 /tmp/graphite_syncdb
 rm /tmp/graphite_syncdb
 
-exit 0
+rm /etc/nginx/sites-enabled/default
+cat << EOF > /etc/nginx/sites-available/graphite
+server {
+    listen 80;
+    root /opt/graphite/webapp/content;
+    index index.html;
 
+    location / {
+      # checks for static file, if not found proxy to app
+      try_files \$uri @app;
+    }
 
-## Configure carbon
-#cd /opt/graphite/conf/
-#cp carbon.conf.example carbon.conf
-#
-## Create storage schema and copy it over
-## Using the sample as provided in the statsd README
-## https://github.com/etsy/statsd#graphite-schema
-#cat >> ./storage-schemas.conf << EOF
-## Schema definitions for Whisper files. Entries are scanned in order,
-## and first match wins. This file is scanned for changes every 60 seconds.
-##
-## [name]
-## pattern = regex
-## retentions = timePerPoint:timeToStore, timePerPoint:timeToStore, ...
-#[stats]
-#priority = 110
-#pattern = ^stats\..*
-#retentions = 10s:6h,1m:7d,10m:1y
-#EOF
-#
-## Make sure log dir exists for webapp
-#mkdir -p /opt/graphite/storage/log/webapp
-#
-## Copy over the local settings file and initialize database
-#cd /opt/graphite/webapp/graphite/
-#cp local_settings.py.example local_settings.py
-#python /opt/graphite/webapp/graphite/manage.py syncdb --noinput
-#
+    location @app {
+        include fastcgi_params;
+        fastcgi_split_path_info ^()(.*)$;
+        fastcgi_pass 127.0.0.1:8080;
+    }
+}
+EOF
+ln -s /etc/nginx/sites-available/graphite /etc/nginx/sites-enabled/graphite
