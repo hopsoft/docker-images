@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# start the graphite web application using the django development server
+# runs on port: 8080 by default
+PYTHONPATH=/opt/graphite/whisper /opt/graphite/bin/run-graphite-devel-server.py --libs=/opt/graphite/webapp/ /opt/graphite/
