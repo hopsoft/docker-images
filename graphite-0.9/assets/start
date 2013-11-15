@@ -9,13 +9,62 @@ mkdir -p /var/log/carbon
 
 
 
+# setup django db superuser for graphite --------------------------------------
+cat << EOF > /tmp/graphite_syncdb
+#!/usr/bin/env expect
+
+set timeout -1
+spawn python /opt/graphite/webapp/graphite/manage.py syncdb
+
+expect "Would you like to create one now" {
+  send "yes\r"
+}
+
+expect "Username *:" {
+  send "root\r"
+}
+
+expect "E-mail address:" {
+  send "root.graphite@mailinator.com\r"
+}
+
+expect "Password:" {
+  send "root\r"
+}
+
+expect "Password *:" {
+  send "root\r"
+}
+
+expect "Superuser created successfully"
+EOF
+chmod 775 /tmp/graphite_syncdb
+/tmp/graphite_syncdb
+rm /tmp/graphite_syncdb
+
+
+
+
+# configure graphite ----------------------------------------------------------
+cat << EOF > /opt/graphite/webapp/graphite/local_settings.py
+SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 32)'
+EOF
+
+
+
+
 # start graphite web app cgi server -------------------------------------------
 python /opt/graphite/webapp/graphite/manage.py runfcgi host=127.0.0.1 port=8080
 
 
 
 
+# start nginx -----------------------------------------------------------------
 service nginx start
 
 
-read
+
+
+# start statsd ----------------------------------------------------------------
+node /opt/statsd/stats.js /opt/statsd/config.js
+

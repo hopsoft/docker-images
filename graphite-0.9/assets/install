@@ -50,6 +50,11 @@ git clone https://github.com/graphite-project/carbon.git
 cd carbon
 git checkout 0.9.12
 
+cd /opt
+git clone https://github.com/etsy/statsd.git
+cd statsd
+git checkout v0.6.0
+
 
 
 
@@ -66,46 +71,15 @@ python ./setup.py install
 
 
 
-# configure apps --------------------------------------------------------------
+# configure carbon ------------------------------------------------------------
 cp /opt/graphite/conf/carbon.conf.example /opt/graphite/conf/carbon.conf
 cp /opt/graphite/conf/storage-schemas.conf.example /opt/graphite/conf/storage-schemas.conf
 
-cat << EOF > /opt/graphite/webapp/graphite/local_settings.py
-SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 32)'
-EOF
 
-cat << EOF > /tmp/graphite_syncdb
-#!/usr/bin/env expect
 
-set timeout -1
-spawn python /opt/graphite/webapp/graphite/manage.py syncdb
 
-expect "Would you like to create one now" {
-  send "yes\r"
-}
-
-expect "Username *:" {
-  send "root\r"
-}
-
-expect "E-mail address:" {
-  send "root.graphite@mailinator.com\r"
-}
-
-expect "Password:" {
-  send "root\r"
-}
-
-expect "Password *:" {
-  send "root\r"
-}
-
-expect "Superuser created successfully"
-EOF
-chmod 775 /tmp/graphite_syncdb
-/tmp/graphite_syncdb
-rm /tmp/graphite_syncdb
-
+# configure nginx -------------------------------------------------------------
+mkdir -p /var/log/nginx
 rm /etc/nginx/sites-enabled/default
 cat << EOF > /etc/nginx/sites-available/graphite
 server {
@@ -126,3 +100,16 @@ server {
 }
 EOF
 ln -s /etc/nginx/sites-available/graphite /etc/nginx/sites-enabled/graphite
+
+
+
+
+# configure statsd ------------------------------------------------------------
+cat << EOF > /opt/statsd/config.js
+{
+  graphiteHost: "127.0.0.1",
+  graphitePort: 2003,
+  port: 8125
+}
+EOF
+
